@@ -583,9 +583,9 @@ async function getPrediction(parcelId) {
                   These indicators provide context only and do not change the model
                   estimate. Demographic and environmental indicators are Census-tract
                   context; school indicators use coordinate-matched Census TIGER
-                  districts and NCES district statistics; historical storm events and
-                  public-safety data cover broader areas; construction-cost indicators
-                  are national.
+                  districts and NCES district statistics; historical storm events,
+                  FBI public-safety statistics, and federal disaster declarations cover
+                  broader areas; construction-cost indicators are national.
                 </p>
 
               <div className="contextGrid">
@@ -597,7 +597,7 @@ async function getPrediction(parcelId) {
                   ["storm_history", "Historical Storm Events"],
                   ["school_context", "School Context"],
                   ["public_safety", "Public Safety Context"],
-                  ["civic_disruption", "Civic Disruption Context"]
+                  ["civic_disruption", "Disaster Declaration History"]
                 ].map(([key, title]) => (
                   <div className="contextTile" key={key}>
                     <h3>{title}</h3>

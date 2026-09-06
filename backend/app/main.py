@@ -408,9 +408,9 @@ def get_daily_traffic(
 
 def filter_context_for_location(rows, parcel):
     """
-    Remove legacy school and public-safety context rows.
+    Remove legacy school, public-safety, and civic disruption context rows.
 
-    School and public-safety context are loaded separately from their
+    These categories are loaded separately from their
     automated, geographically matched source tables.
     """
     filtered = []
@@ -423,6 +423,7 @@ def filter_context_for_location(rows, parcel):
         if category in {
             "school_context",
             "public_safety",
+            "civic_disruption",
         }:
             continue
 
@@ -792,7 +793,280 @@ def get_parcel_context(parcel_id: str):
                                 "notes"
                             ),
                     })
-                # Load the Yellowstone County NOAA storm-history summary.
+        # Load the automated Yellowstone County federal disaster
+        # declaration history. These records are county-level public
+        # emergency context, not parcel-specific hazard determinations.
+        if county_context_id:
+            disaster_result = (
+                client
+                .table(
+                    "fema_disaster_declaration_summary"
+                )
+                .select("*")
+                .eq(
+                    "county_fips",
+                    "30111",
+                )
+                .limit(1)
+                .execute()
+            )
+
+            disaster_row = (
+                disaster_result.data[0]
+                if disaster_result.data
+                else None
+            )
+
+            if disaster_row:
+                disaster_metrics = [
+                    {
+                        "key": "total",
+                        "name":
+                            "Federal disaster declarations",
+                        "field":
+                            "total_declaration_count",
+                        "unit": "declarations",
+                    },
+                    {
+                        "key": "biological",
+                        "name":
+                            "Disaster declarations: Biological",
+                        "field":
+                            "biological_declaration_count",
+                        "unit": "declarations",
+                    },
+                    {
+                        "key": "fire",
+                        "name":
+                            "Disaster declarations: Fire",
+                        "field":
+                            "fire_declaration_count",
+                        "unit": "declarations",
+                    },
+                    {
+                        "key": "flood",
+                        "name":
+                            "Disaster declarations: Flood",
+                        "field":
+                            "flood_declaration_count",
+                        "unit": "declarations",
+                    },
+                    {
+                        "key": "hurricane",
+                        "name":
+                            "Disaster declarations: Hurricane",
+                        "field":
+                            "hurricane_declaration_count",
+                        "unit": "declarations",
+                    },
+                    {
+                        "key": "severe-storm",
+                        "name":
+                            "Disaster declarations: Severe Storm",
+                        "field":
+                            "severe_storm_declaration_count",
+                        "unit": "declarations",
+                    },
+                ]
+
+                other_count = int(
+                    disaster_row.get(
+                        "other_declaration_count"
+                    )
+                    or 0
+                )
+
+                if other_count > 0:
+                    disaster_metrics.append({
+                        "key": "other",
+                        "name":
+                            "Other disaster declarations",
+                        "field":
+                            "other_declaration_count",
+                        "unit": "declarations",
+                    })
+
+                for metric in disaster_metrics:
+                    metric_value = (
+                        disaster_row.get(
+                            metric["field"]
+                        )
+                    )
+
+                    if metric_value is None:
+                        metric_text = (
+                            "Not available"
+                        )
+                    else:
+                        declaration_count = int(
+                            float(metric_value)
+                        )
+
+                        declaration_label = (
+                            "declaration"
+                            if declaration_count == 1
+                            else "declarations"
+                        )
+
+                        metric_text = (
+                            f"{declaration_count:,} "
+                            f"{declaration_label}"
+                        )
+
+                    grouped[
+                        "civic_disruption"
+                    ].append({
+                        "id": (
+                            "fema-disaster-"
+                            f"{metric['key']}"
+                        ),
+                        "parcel_id": parcel_id,
+                        "geography_name":
+                            disaster_row.get(
+                                "geography_name"
+                            ),
+                        "geography_level":
+                            disaster_row.get(
+                                "geography_level"
+                            )
+                            or "county",
+                        "context_category":
+                            "civic_disruption",
+                        "metric_name":
+                            metric["name"],
+                        "metric_value":
+                            metric_value,
+                        "metric_text":
+                            metric_text,
+                        "metric_unit":
+                            metric["unit"],
+                        "source_name":
+                            disaster_row.get(
+                                "source_name"
+                            )
+                            or (
+                                "OpenFEMA Disaster "
+                                "Declarations Summaries"
+                            ),
+                        "source_url":
+                            disaster_row.get(
+                                "source_url"
+                            ),
+                        "source_period":
+                            disaster_row.get(
+                                "source_period"
+                            ),
+                        "source_date":
+                            disaster_row.get(
+                                "source_date"
+                            ),
+                        "confidence_level":
+                            disaster_row.get(
+                                "confidence_level"
+                            )
+                            or "context_only",
+                        "notes":
+                            disaster_row.get(
+                                "notes"
+                            ),
+                    })
+
+                latest_date = str(
+                    disaster_row.get(
+                        "latest_declaration_date"
+                    )
+                    or ""
+                )[:10]
+
+                latest_type = (
+                    disaster_row.get(
+                        "latest_incident_type"
+                    )
+                    or "Unknown"
+                )
+
+                latest_title = (
+                    disaster_row.get(
+                        "latest_declaration_title"
+                    )
+                    or "Title unavailable"
+                )
+
+                latest_number = (
+                    disaster_row.get(
+                        "latest_disaster_number"
+                    )
+                )
+
+                latest_year = (
+                    disaster_row.get(
+                        "latest_declaration_year"
+                    )
+                )
+
+                grouped[
+                    "civic_disruption"
+                ].append({
+                    "id":
+                        "fema-disaster-latest",
+                    "parcel_id": parcel_id,
+                    "geography_name":
+                        disaster_row.get(
+                            "geography_name"
+                        ),
+                    "geography_level":
+                        disaster_row.get(
+                            "geography_level"
+                        )
+                        or "county",
+                    "context_category":
+                        "civic_disruption",
+                    "metric_name":
+                        "Most recent federal disaster declaration",
+                    "metric_value": None,
+                    "metric_text": (
+                        f"{latest_type} · "
+                        f"{latest_date} · "
+                        f"{latest_title}"
+                    ),
+                    "metric_unit": None,
+                    "disaster_number":
+                        latest_number,
+                    "source_name":
+                        disaster_row.get(
+                            "source_name"
+                        )
+                        or (
+                            "OpenFEMA Disaster "
+                            "Declarations Summaries"
+                        ),
+                    "source_url":
+                        disaster_row.get(
+                            "source_url"
+                        ),
+                    "source_period": (
+                        str(latest_year)
+                        if latest_year
+                        is not None
+                        else disaster_row.get(
+                            "source_period"
+                        )
+                    ),
+                    "source_date":
+                        disaster_row.get(
+                            "latest_declaration_date"
+                        ),
+                    "confidence_level":
+                        disaster_row.get(
+                            "confidence_level"
+                        )
+                        or "context_only",
+                    "notes":
+                        disaster_row.get(
+                            "notes"
+                        ),
+                })
+        # Load the Yellowstone County NOAA storm-history summary.
         # NOAA records are county-level historical context and do not
         # represent parcel-specific hazard exposure.
         if county_context_id:
