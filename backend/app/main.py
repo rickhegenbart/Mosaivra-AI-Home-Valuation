@@ -408,68 +408,25 @@ def get_daily_traffic(
 
 def filter_context_for_location(rows, parcel):
     """
-    Keep the most relevant public-safety rows for the parcel's location.
+    Remove legacy school and public-safety context rows.
 
-    School context is loaded separately using the parcel's exact Census
-    TIGER school-district mapping. Older generic school-context rows are
-    excluded here to prevent incorrect city-name or county-wide matches.
+    School and public-safety context are loaded separately from their
+    automated, geographically matched source tables.
     """
-    parcel = parcel or {}
-
-    city = (
-        parcel.get("site_city")
-        or ""
-    ).upper()
-
-    address = (
-        parcel.get("address_line_1")
-        or ""
-    ).upper()
-
-    location_text = f"{city} {address}"
-
-    def public_safety_match(geography):
-        geography = (
-            geography
-            or ""
-        ).upper()
-
-        if "BILLINGS" in location_text:
-            return (
-                "BILLINGS POLICE"
-                in geography
-            )
-
-        # Fallback for non-Billings
-        # Yellowstone County parcels.
-        return (
-            "YELLOWSTONE COUNTY"
-            in geography
-        )
-
     filtered = []
 
     for row in rows:
         category = row.get(
             "context_category"
         )
-        geography = (
-            row.get("geography_name")
-            or ""
-        )
 
-        if category == "school_context":
-            # Exact school context is loaded from
-            # parcel_school_district_map below.
+        if category in {
+            "school_context",
+            "public_safety",
+        }:
             continue
 
-        if category == "public_safety":
-            if public_safety_match(
-                geography
-            ):
-                filtered.append(row)
-        else:
-            filtered.append(row)
+        filtered.append(row)
 
     return filtered
 
@@ -590,6 +547,251 @@ def get_parcel_context(parcel_id: str):
             category = row.get("context_category")
             if category in grouped:
                 grouped[category].append(row)
+                # Load the latest automated FBI public-safety summary.
+        # Billings parcels use Billings Police Department data.
+        # Other Yellowstone County parcels use the participating-agency
+        # county summary.
+        if county_context_id:
+            parcel_city = (
+                parcel_row.get("site_city")
+                or ""
+            ).strip().upper()
+
+            parcel_address = (
+                parcel_row.get("address_line_1")
+                or ""
+            ).strip().upper()
+
+            parcel_location = (
+                f"{parcel_city} {parcel_address}"
+            )
+
+            public_safety_scope = (
+                "billings_police"
+                if "BILLINGS" in parcel_location
+                else "yellowstone_participating_agencies"
+            )
+
+            public_safety_result = (
+                client
+                .table(
+                    "fbi_public_safety_summary"
+                )
+                .select("*")
+                .eq(
+                    "scope_key",
+                    public_safety_scope,
+                )
+                .order(
+                    "report_year",
+                    desc=True,
+                )
+                .limit(1)
+                .execute()
+            )
+
+            public_safety_row = (
+                public_safety_result.data[0]
+                if public_safety_result.data
+                else None
+            )
+
+            if public_safety_row:
+                report_year = (
+                    public_safety_row.get(
+                        "report_year"
+                    )
+                )
+
+                public_safety_metrics = [
+                    {
+                        "key": "covered-population",
+                        "name": "Covered population",
+                        "field": "covered_population",
+                        "unit": "people",
+                        "format": "count",
+                    },
+                    {
+                        "key": "violent-crime-count",
+                        "name": "Reported violent offenses",
+                        "field": "violent_crime_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "violent-crime-rate",
+                        "name": "Reported violent-offense rate",
+                        "field":
+                            "violent_crime_rate_per_1000",
+                        "unit":
+                            "per 1,000 covered population",
+                        "format": "rate",
+                    },
+                    {
+                        "key": "property-crime-count",
+                        "name": "Reported property offenses",
+                        "field": "property_crime_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "property-crime-rate",
+                        "name": "Reported property-offense rate",
+                        "field":
+                            "property_crime_rate_per_1000",
+                        "unit":
+                            "per 1,000 covered population",
+                        "format": "rate",
+                    },
+                    {
+                        "key": "homicide-count",
+                        "name": "Reported homicides",
+                        "field": "homicide_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "rape-count",
+                        "name": "Reported rape offenses",
+                        "field": "rape_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "robbery-count",
+                        "name": "Reported robbery offenses",
+                        "field": "robbery_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "aggravated-assault-count",
+                        "name":
+                            "Reported aggravated assaults",
+                        "field":
+                            "aggravated_assault_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "burglary-count",
+                        "name": "Reported burglaries",
+                        "field": "burglary_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "larceny-count",
+                        "name":
+                            "Reported larceny/theft offenses",
+                        "field": "larceny_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "motor-vehicle-theft-count",
+                        "name":
+                            "Reported motor-vehicle thefts",
+                        "field":
+                            "motor_vehicle_theft_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                    {
+                        "key": "arson-count",
+                        "name": "Reported arson offenses",
+                        "field": "arson_count",
+                        "unit": "offenses",
+                        "format": "count",
+                    },
+                ]
+
+                for metric in public_safety_metrics:
+                    metric_value = (
+                        public_safety_row.get(
+                            metric["field"]
+                        )
+                    )
+
+                    if metric_value is None:
+                        metric_text = (
+                            "Not available"
+                        )
+                    elif metric["format"] == "rate":
+                        metric_text = (
+                            f"{float(metric_value):,.2f} "
+                            "per 1,000 people"
+                        )
+                    elif metric["field"] == (
+                        "covered_population"
+                    ):
+                        metric_text = (
+                            f"{int(float(metric_value)):,} "
+                            "people"
+                        )
+                    else:
+                        metric_text = (
+                            f"{int(float(metric_value)):,} "
+                            "offenses"
+                        )
+
+                    grouped[
+                        "public_safety"
+                    ].append({
+                        "id": (
+                            "fbi-public-safety-"
+                            f"{public_safety_scope}-"
+                            f"{metric['key']}"
+                        ),
+                        "parcel_id": parcel_id,
+                        "scope_key":
+                            public_safety_scope,
+                        "geography_name":
+                            public_safety_row.get(
+                                "geography_name"
+                            ),
+                        "geography_level":
+                            public_safety_row.get(
+                                "geography_level"
+                            ),
+                        "context_category":
+                            "public_safety",
+                        "metric_name":
+                            metric["name"],
+                        "metric_value":
+                            metric_value,
+                        "metric_text":
+                            metric_text,
+                        "metric_unit":
+                            metric["unit"],
+                        "source_name":
+                            public_safety_row.get(
+                                "source_name"
+                            )
+                            or (
+                                "FBI Crime Data "
+                                "Explorer"
+                            ),
+                        "source_url":
+                            public_safety_row.get(
+                                "source_url"
+                            ),
+                        "source_period":
+                            str(report_year),
+                        "source_date":
+                            public_safety_row.get(
+                                "source_date"
+                            ),
+                        "confidence_level":
+                            public_safety_row.get(
+                                "confidence_level"
+                            )
+                            or "context_only",
+                        "notes":
+                            public_safety_row.get(
+                                "notes"
+                            ),
+                    })
                 # Load the Yellowstone County NOAA storm-history summary.
         # NOAA records are county-level historical context and do not
         # represent parcel-specific hazard exposure.

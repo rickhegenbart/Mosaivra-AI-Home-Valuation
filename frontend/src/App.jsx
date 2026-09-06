@@ -621,7 +621,9 @@ async function getPrediction(parcelId) {
                     ? 9
                     : key === "construction_cost"
                         ? 6
-                        : 8
+                        : key === "public_safety"
+                            ? 13
+                            : 8
 )} of {(parcelContext.context?.[key] || []).length} indicators
                         </p>
 
@@ -640,7 +642,9 @@ async function getPrediction(parcelId) {
                     ? 9
                     : key === "construction_cost"
                         ? 6
-                        : 8
+                        : key === "public_safety"
+                            ? 13
+                            : 8
 )
                           .map((item) => (
                         <div className="contextMetric" key={item.id || item.metric_name}>
