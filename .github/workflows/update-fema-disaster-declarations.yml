@@ -1,0 +1,50 @@
+name: Update FEMA Disaster Declarations
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 13 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-fema-disaster-declarations
+  cancel-in-progress: false
+
+jobs:
+  update-fema-disaster-declarations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Validate pipeline syntax
+        run: >
+          python -m py_compile
+          pipeline/update_fema_disaster_declarations.py
+
+      - name: Update FEMA disaster declarations
+        run: >
+          python -m
+          pipeline.update_fema_disaster_declarations
