@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Run monthly on the third day at 14:30 UTC.
-    # This allows the Yellowstone parcel update to finish first.
-    - cron: "30 14 3 * *"
+    # Run monthly on the 12th at 14:30 UTC.
+    # Scheduled after parcel updates on the 10th and Census mapping on the 11th.
+    - cron: "30 14 12 * *"
 
 permissions:
   contents: read
