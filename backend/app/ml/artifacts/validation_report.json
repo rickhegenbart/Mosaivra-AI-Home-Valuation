@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "comparison_available": true,
+  "checks": {
+    "mae_within_10_percent": true,
+    "r2_within_0_05": true,
+    "within_20_pct_within_5_points": true
+  },
+  "current_model_metrics": {
+    "model": "random_forest_proxy_model",
+    "row_count": 15661,
+    "mae": 90335.01448487,
+    "median_absolute_error": 35547.31286458197,
+    "rmse": 229872.36766328424,
+    "r2": 0.5025870001213464,
+    "mape_pct": 301.09531967203964,
+    "within_10_pct": 33.873954409041566,
+    "within_15_pct": 46.02515803588532,
+    "within_20_pct": 55.14973501053573
+  },
+  "candidate_model_metrics": {
+    "model": "random_forest_proxy_model_without_listing_data",
+    "row_count": 15661,
+    "mae": 91225.18926876617,
+    "median_absolute_error": 36724.24764326762,
+    "rmse": 234106.93536069695,
+    "r2": 0.47731085344432456,
+    "mape_pct": 253.56307008338743,
+    "within_10_pct": 33.29289317412682,
+    "within_15_pct": 45.3993997829002,
+    "within_20_pct": 54.753847136198196
+  }
+}
