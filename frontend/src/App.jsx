@@ -1046,22 +1046,32 @@ async function getPrediction(parcelId) {
         {selectedResult && (
           <section id="feedback-section" className="card feedbackCard">
             <h2>Estimate Feedback</h2>
+
             <div className="sectionNav">
               <span>Step 4 of 4</span>
-              <button type="button" onClick={() => scrollToSection("estimate-section")}>
+              <button
+                type="button"
+                onClick={() => scrollToSection("estimate-section")}
+              >
                 Back to Estimate ↑
               </button>
             </div>
+
             <p className="helperText">
-              Help improve REPredict. Based on what you know about this property,
-              did this estimate feel too low, about right, or too high?
+              After reviewing a property, select <strong>Too Low</strong>,{" "}
+              <strong>About Right</strong>, or <strong>Too High</strong>, then
+              answer the questions below in the comment section.
             </p>
 
             <form onSubmit={submitFeedback} className="feedbackForm">
               <div className="feedbackChoices">
                 <button
                   type="button"
-                  className={feedbackRating === "too_low" ? "feedbackChoice active" : "feedbackChoice"}
+                  className={
+                    feedbackRating === "too_low"
+                      ? "feedbackChoice active"
+                      : "feedbackChoice"
+                  }
                   onClick={() => setFeedbackRating("too_low")}
                 >
                   Too Low
@@ -1069,7 +1079,11 @@ async function getPrediction(parcelId) {
 
                 <button
                   type="button"
-                  className={feedbackRating === "about_right" ? "feedbackChoice active" : "feedbackChoice"}
+                  className={
+                    feedbackRating === "about_right"
+                      ? "feedbackChoice active"
+                      : "feedbackChoice"
+                  }
                   onClick={() => setFeedbackRating("about_right")}
                 >
                   About Right
@@ -1077,24 +1091,69 @@ async function getPrediction(parcelId) {
 
                 <button
                   type="button"
-                  className={feedbackRating === "too_high" ? "feedbackChoice active" : "feedbackChoice"}
+                  className={
+                    feedbackRating === "too_high"
+                      ? "feedbackChoice active"
+                      : "feedbackChoice"
+                  }
                   onClick={() => setFeedbackRating("too_high")}
                 >
                   Too High
                 </button>
               </div>
 
+              <div className="feedbackQuestions">
+                <p>
+                  <strong>Please address the following:</strong>
+                </p>
+
+                <ul>
+                  <li>What property address did you review?</li>
+
+                  <li>
+                    What estimate did REPredict display? If you adjusted the
+                    property inputs, please include both the original and
+                    adjusted estimates.
+                  </li>
+
+                  <li>What value or price range would you expect?</li>
+
+                  <li>
+                    Does your expected value represent likely sale price,
+                    suggested listing price, or assessed value?
+                  </li>
+
+                  <li>
+                    What supports your estimate—for example, comparable closed
+                    sales, a recent transaction, or firsthand knowledge? Include
+                    approximate dates when available.
+                  </li>
+
+                  <li>
+                    What property details might explain the difference, such as
+                    condition, renovations, square footage, outbuildings, or
+                    location?
+                  </li>
+                </ul>
+              </div>
+
               <label className="wideLabel">
-                Optional comment
+                Comments and Supporting Details
                 <textarea
                   value={feedbackComment}
-                  onChange={(event) => setFeedbackComment(event.target.value)}
-                  rows="3"
-                  placeholder="Example: Recently renovated kitchen, dated interior, larger garage, strong comparable sale nearby..."
+                  onChange={(event) =>
+                    setFeedbackComment(event.target.value)
+                  }
+                  rows="12"
+                  placeholder="Enter your feedback here..."
                 />
               </label>
 
-              <button className="submitFeedbackButton" type="submit" disabled={feedbackSubmitting}>
+              <button
+                className="submitFeedbackButton"
+                type="submit"
+                disabled={feedbackSubmitting}
+              >
                 {feedbackSubmitting ? "Saving..." : "Submit Feedback"}
               </button>
 
