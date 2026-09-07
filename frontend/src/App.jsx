@@ -33,7 +33,7 @@ function trackEvent(name, props = {}) {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://parcel-proxy-backend.onrender.com";
+  import.meta.env.VITE_API_BASE_URL || "https://mosaivra-ai-home-valuation-api.onrender.com";
 
 const emptyPropertyDetails = {
   bedrooms: "",
@@ -273,6 +273,9 @@ function MainApp() {
 
       const data = await response.json();
       setParcels(data);
+      if (data.length === 0) {
+        setError("No matching property records were found. Coverage is limited to available Yellowstone County, Montana records. Try a street name or parcel ID. A missing result does not mean the property does not exist.");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -439,7 +442,7 @@ async function getPrediction(parcelId) {
             <p className="eyebrow">Yellowstone County, Montana</p>
             <h1>Mosaivra AI</h1>
           </div>
-          <span className="statusPill">Live MVP</span>
+          <span className="statusPill">Testing release</span>
         </div>
 
         <p className="subtitle">
@@ -470,9 +473,10 @@ async function getPrediction(parcelId) {
               <h3>Model Estimate</h3>
               <p>
                 The model uses public parcel characteristics, location, property
-                type, housing trends, mortgage rates, unemployment, and local
-                listing conditions. It is not trained on private MLS data or
-                verified sale prices.
+                type, housing trends, mortgage rates, and unemployment.
+                It is trained to estimate public-record parcel values, not verified
+                sale prices. Results are experimental and intended for testing.
+                The model is not trained on private MLS data.
               </p>
             </div>
 
@@ -502,11 +506,18 @@ async function getPrediction(parcelId) {
           </p>
         </section>
 
+        <p id="search-coverage" className="helperText">
+          Coverage is currently limited to available Yellowstone County, Montana records.
+          If an address is not found, try the street name or parcel ID.
+        </p>
+
         <form onSubmit={searchParcels} className="searchBox">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search address, city, or parcel ID"
+            aria-label="Search address, city, or parcel ID"
+            aria-describedby="search-coverage"
           />
           <button type="submit" disabled={loadingSearch}>
             {loadingSearch ? "Searching..." : "Search"}
