@@ -1,6 +1,6 @@
-# REPredict
+# Mosaivra AI
 
-**REPredict** is a public-data real estate parcel analysis app for Yellowstone County, Montana. It lets a user search for a parcel by address, city, ZIP code, or parcel ID, then generates an **Estimated Public Parcel Value** range using public parcel records, property characteristics, location, and market/economic indicators.
+**Mosaivra AI** is a public-data real estate parcel analysis app for Yellowstone County, Montana. It lets a user search for a parcel by address, city, ZIP code, or parcel ID, then generates an **Estimated Public Parcel Value** range using public parcel records, property characteristics, location, and market/economic indicators.
 
 Live architecture:
 
@@ -14,7 +14,7 @@ Supabase PostgreSQL
 Compressed scikit-learn model
 ```
 
-> REPredict is a decision-support tool. It is not an appraisal, not a CMA, not an MLS sale-price estimate, and not a guarantee of market value.
+> Mosaivra AI is a decision-support tool. It is not an appraisal, not a CMA, not an MLS sale-price estimate, and not a guarantee of market value.
 
 ---
 
@@ -84,7 +84,7 @@ Example parcel ID:
 
 ## What the app does not do
 
-REPredict does not currently use:
+Mosaivra AI does not currently use:
 
 ```text
 MLS comparable sales
@@ -167,7 +167,7 @@ The backend runs on Render and requires these environment variables:
 SUPABASE_URL=https://zfwtwdjnbdsieibkfbvv.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<server-side Supabase service role key>
 APP_ENV=production
-APP_NAME=Public Parcel Value Proxy API
+APP_NAME=Mosaivra AI: Home Valuation API
 MODEL_PATH=app/ml/artifacts/price_model_compressed.joblib
 FEATURE_COLUMNS_PATH=app/ml/artifacts/feature_columns.json
 MODEL_METRICS_PATH=app/ml/artifacts/model_metrics.json
@@ -215,7 +215,7 @@ Expected successful response:
 
 ```json
 {
-  "status": "Public Parcel Value Proxy API running in production",
+  "status": "Mosaivra AI: Home Valuation API running in production",
   "model_loaded": true,
   "feature_count": 35,
   "supabase_configured": true
@@ -282,7 +282,7 @@ Example successful response includes:
 From the frontend folder:
 
 ```bash
-cd ~/REPredictworking/frontend
+cd ~/Mosaivra AIworking/frontend
 npm install
 npm run dev -- --host 0.0.0.0 --port 5173
 ```
@@ -300,7 +300,7 @@ http://100.115.92.194:5173/
 From the backend folder:
 
 ```bash
-cd ~/REPredictworking/fastapi_parcel_proxy_backend/backend
+cd ~/Mosaivra AIworking/fastapi_mosaivra_ai_home_valuation_backend/backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -433,7 +433,7 @@ Track model versions and retraining dates.
 Use:
 
 ```text
-REPredict
+Mosaivra AI
 Estimated Public Parcel Value
 Public Parcel Value Proxy
 Decision-support estimate

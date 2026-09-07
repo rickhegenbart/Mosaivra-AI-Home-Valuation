@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: parcel_proxy_backend
+    container_name: mosaivra_ai_home_valuation_backend
     env_file:
       - ./backend/.env
     ports:

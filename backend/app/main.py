@@ -158,7 +158,7 @@ def submit_feedback(feedback: FeedbackSubmission):
         client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
         payload = feedback.model_dump()
-        payload["source"] = "repredict_frontend"
+        payload["source"] = "mosaivra_frontend"
 
         result = client.table("parcel_feedback").insert(payload).execute()
 
@@ -274,7 +274,7 @@ class SiteEventSubmission(BaseModel):
 @app.post("/api/v1/events")
 def capture_site_event(event: SiteEventSubmission):
     """
-    Capture first-party REPredict traffic and product events.
+    Capture first-party Mosaivra AI traffic and product events.
     Does not collect names, emails, or IP addresses.
     """
     allowed_events = {
@@ -292,7 +292,7 @@ def capture_site_event(event: SiteEventSubmission):
         client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
         payload = event.dict()
-        payload["source"] = "repredict_frontend"
+        payload["source"] = "mosaivra_frontend"
 
         client.table("site_events").insert(payload).execute()
 

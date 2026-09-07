@@ -1,4 +1,4 @@
-# Public Parcel Value Proxy API
+# Mosaivra AI: Home Valuation API
 
 FastAPI backend for the Yellowstone County public parcel value proxy model.
 

@@ -100,7 +100,7 @@ def request_bytes(
         url,
         headers={
             "User-Agent": (
-                "Parcel-Proxy-AI/1.0 "
+                "Mosaivra-AI-Home-Valuation/1.0 "
                 "NOAA-Storm-Events-Updater"
             )
         },

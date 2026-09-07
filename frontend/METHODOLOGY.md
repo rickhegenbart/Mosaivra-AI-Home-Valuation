@@ -1,12 +1,12 @@
-REPredict Methodology
+Mosaivra AI Methodology
 
 Last updated: September 6, 2026
 
-1. What REPredict is
+1. What Mosaivra AI is
 
-REPredict is a public-data real estate parcel analysis tool for Yellowstone County, Montana. It produces an Estimated Public Parcel Value using public parcel characteristics, location fields, and government economic indicators.
+Mosaivra AI is a public-data real estate parcel analysis tool for Yellowstone County, Montana. It produces an Estimated Public Parcel Value using public parcel characteristics, location fields, and government economic indicators.
 
-REPredict is designed as a decision-support and screening tool. It is not an appraisal, comparative market analysis (CMA), inspection, insurance assessment, or guarantee of market or sale value.
+Mosaivra AI is designed as a decision-support and screening tool. It is not an appraisal, comparative market analysis (CMA), inspection, insurance assessment, or guarantee of market or sale value.
 
 2. What the model predicts
 
@@ -386,6 +386,6 @@ Evaluate results against an authorized, representative validation dataset that i
 
 16. Summary
 
-REPredict estimates a public parcel value using 25 features derived from public parcel records, public property classifications, FHFA housing indicators, and FRED economic indicators. It supplements the estimate with automated public-data context layers that remain separate from the trained model.
+Mosaivra AI estimates a public parcel value using 25 features derived from public parcel records, public property classifications, FHFA housing indicators, and FRED economic indicators. It supplements the estimate with automated public-data context layers that remain separate from the trained model.
 
 The system is most useful for early-stage screening, comparison, and public-data exploration. It should not replace an appraisal, professional comparative analysis, inspection, insurance review, or other qualified real-estate judgment.

@@ -82,7 +82,7 @@ def hud_request(
             "Authorization": f"Bearer {HUD_API_TOKEN}",
             "Accept": "application/json",
             "User-Agent": (
-                "Parcel-Proxy-AI/1.0 "
+                "Mosaivra-AI-Home-Valuation/1.0 "
                 "(HUD Fair Market Rent updater)"
             ),
         },

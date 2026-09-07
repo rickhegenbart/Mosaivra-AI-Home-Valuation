@@ -1,12 +1,12 @@
-# Parcel Proxy AI
+# Mosaivra AI: Home Valuation
 
-Parcel Proxy AI is a public-data-based real estate decision-support application. It combines parcel records, market indicators, location context, and machine-learning predictions to provide quick property-value checks.
+Mosaivra AI: Home Valuation is a public-data-based real estate decision-support application. It combines parcel records, market indicators, location context, and machine-learning predictions to provide quick property-value checks.
 
 The platform is designed for real estate professionals, investors, and other users who need accessible property intelligence while researching properties or working in the field.
 
 ## Current Status
 
-Parcel Proxy AI is an active MVP with a deployed React frontend, FastAPI backend, Supabase data layer, trained valuation model, and automated economic-data updates.
+Mosaivra AI: Home Valuation is an active MVP with a deployed React frontend, FastAPI backend, Supabase data layer, trained valuation model, and automated economic-data updates.
 
 ## Features
 
@@ -157,7 +157,7 @@ The larger uncompressed model is excluded from Git because it exceeds GitHub’s
 
 ## Important Disclaimer
 
-Parcel Proxy AI provides a public-data-based parcel value proxy for decision support. Its estimates are not licensed appraisals, comparative market analyses, MLS sale-price estimates, or guarantees of market value.
+Mosaivra AI: Home Valuation provides a public-data-based parcel value proxy for decision support. Its estimates are not licensed appraisals, comparative market analyses, MLS sale-price estimates, or guarantees of market value.
 
 Prediction quality varies according to parcel type, available public records, geographic coverage, model segment, and current market conditions.
 

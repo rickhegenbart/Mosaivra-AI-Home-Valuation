@@ -49,7 +49,7 @@ def url_exists(url: str) -> bool:
         method="HEAD",
         headers={
             "User-Agent": (
-                "Parcel-Proxy-AI/1.0 "
+                "Mosaivra-AI-Home-Valuation/1.0 "
                 "Census-Tract-Mapping-Updater"
             )
         },

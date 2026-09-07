@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-APP_NAME = os.getenv("APP_NAME", "Public Parcel Value Proxy API")
+APP_NAME = os.getenv("APP_NAME", "Mosaivra AI: Home Valuation API")
 APP_ENV = os.getenv("APP_ENV", "development")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
