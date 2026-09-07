@@ -1,0 +1,77 @@
+name: Mosaivra Code Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mosaivra-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build frontend
+        env:
+          VITE_API_BASE_URL: https://mosaivra-ai-home-valuation-api.onrender.com
+        run: npm run build
+      - name: Verify build output
+        run: test -s dist/index.html
+
+  backend-syntax:
+    name: Backend Python syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate tracked backend Python files
+        run: |
+          python - <<'PY'
+          import pathlib
+          import subprocess
+          import sys
+
+          paths = subprocess.check_output(
+              ['git', 'ls-files', '-z', '--', 'backend/']
+          ).decode().split('\0')
+          files = [pathlib.Path(path) for path in paths if path.endswith('.py')]
+          if not files:
+              sys.exit('No tracked backend Python files found.')
+          failures = []
+          for path in files:
+              try:
+                  compile(path.read_bytes(), str(path), 'exec')
+              except (SyntaxError, ValueError, OSError) as exc:
+                  failures.append(str(path))
+                  print(f'FAIL: {path}: {exc}')
+          if failures:
+              sys.exit(f'Syntax validation failed for {len(failures)} file(s).')
+          print(f'Syntax validation passed for {len(files)} Python files.')
+          PY
