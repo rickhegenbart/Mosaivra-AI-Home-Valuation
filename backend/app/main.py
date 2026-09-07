@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Query, Header
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client
 
@@ -139,10 +139,15 @@ def predict_manual(request: ManualPredictionRequest):
 
 
 class FeedbackSubmission(BaseModel):
-    tester_name: str | None = Field(default=None, max_length=120)
-    tester_email: str | None = Field(
-        default=None, max_length=254, pattern=r"^[^\s@]+@[^\s@]+$"
+    tester_name: str = Field(..., min_length=1, max_length=120)
+    tester_email: str = Field(
+        ..., min_length=3, max_length=254, pattern=r"^[^\s@]+@[^\s@]+$"
     )
+    @field_validator("tester_name", "tester_email", mode="before")
+    @classmethod
+    def trim_tester_contact(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
     parcel_id: str | None = None
     property_id: str | None = None
     address_line_1: str | None = None

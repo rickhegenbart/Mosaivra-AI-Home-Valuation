@@ -353,6 +353,11 @@ async function getPrediction(parcelId) {
   async function submitFeedback(event) {
     event.preventDefault();
 
+    if (!testerContact.name.trim() || !testerContact.email.trim()) {
+      setFeedbackStatus("Please enter your name and email before submitting feedback.");
+      return;
+    }
+
     if (!feedbackRating || !selectedResult) {
       setFeedbackStatus("Please choose whether the estimate felt too low, about right, or too high.");
       return;
@@ -373,8 +378,8 @@ async function getPrediction(parcelId) {
       parcel_id: parcel?.parcel_id || null,
       property_id: parcel?.property_id || null,
       address_line_1: parcel?.address_line_1 || null,
-      tester_name: testerContact.name.trim() || null,
-      tester_email: testerContact.email.trim() || null,
+      tester_name: testerContact.name.trim(),
+      tester_email: testerContact.email.trim(),
       rating: feedbackRating,
       comment: feedbackComment || null,
       baseline_estimate: baselineEstimate,
@@ -1097,16 +1102,18 @@ async function getPrediction(parcelId) {
 
             <form onSubmit={submitFeedback} className="feedbackForm">
               <fieldset style={{ border: "1px solid #888", borderRadius: 8, padding: 16, marginBottom: 16 }}>
-                <legend>Your details (optional)</legend>
+                <legend>Your details (required)</legend>
                 <p className="helperText" id="tester-contact-help">
-                  Your name and email are included with your feedback so we can follow up.
-                  We remember them in this browser for your next property review.
-                  You can edit or clear them anytime.
+                  Your name and email will automatically fill in on your next property review
+                  in this browser on this device. They will not automatically appear on other devices.
+                  Your details are sent with each feedback submission and are visible to the
+                  Mosaivra AI administrator in the private feedback dashboard. You can edit or
+                  clear the saved details anytime.
                 </p>
                 <div style={{ display: "grid", gap: 12 }}>
                   <label htmlFor="tester-name">Name
                     <input id="tester-name" name="tester_name" type="text"
-                      autoComplete="name" maxLength={120}
+                      autoComplete="name" maxLength={120} required
                       aria-describedby="tester-contact-help"
                       style={{ display: "block", width: "100%", boxSizing: "border-box", padding: 10 }}
                       value={testerContact.name}
@@ -1115,7 +1122,7 @@ async function getPrediction(parcelId) {
                   </label>
                   <label htmlFor="tester-email">Email
                     <input id="tester-email" name="tester_email" type="email"
-                      autoComplete="email" maxLength={254}
+                      autoComplete="email" maxLength={254} required
                       aria-describedby="tester-contact-help"
                       style={{ display: "block", width: "100%", boxSizing: "border-box", padding: 10 }}
                       value={testerContact.email}
