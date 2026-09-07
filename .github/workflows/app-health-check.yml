@@ -1,0 +1,118 @@
+name: Mosaivra App Health Check
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: mosaivra-app-health
+  cancel-in-progress: false
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check live website and API
+        shell: bash
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          import math
+          import time
+          import urllib.request
+          
+          ORIGIN = "https://mosaivra.app"
+          API = "https://mosaivra-ai-home-valuation-api.onrender.com"
+          PARCEL = "03103235203040000"
+          
+          
+          def require(condition, message):
+              if not condition:
+                  raise RuntimeError(message)
+          
+          
+          def request(url, method="GET", payload=None, extra_headers=None):
+              headers = {"Origin": ORIGIN, "User-Agent": "Mosaivra-Health-Check/1.0"}
+              if payload is not None:
+                  headers["Content-Type"] = "application/json"
+              headers.update(extra_headers or {})
+              req = urllib.request.Request(
+                  url, method=method, headers=headers,
+                  data=json.dumps(payload).encode() if payload is not None else None,
+              )
+              with urllib.request.urlopen(req, timeout=60) as response:
+                  require(response.status == 200, f"Unexpected HTTP status: {response.status}")
+                  return response.headers, response.read()
+          
+          
+          def require_cors(headers):
+              require(headers.get("Access-Control-Allow-Origin") == ORIGIN,
+                      "Backend is not allowing browser access from mosaivra.app")
+          
+          
+          def website():
+              headers, body = request(ORIGIN)
+              require("text/html" in headers.get("Content-Type", ""), "Website did not return HTML")
+              require(b'id="root"' in body or b"id='root'" in body, "Website app root is missing")
+          
+          
+          def model():
+              headers, body = request(API + "/api/v1/model/metadata")
+              require_cors(headers)
+              require(json.loads(body).get("model_loaded") is True, "Prediction model is not loaded")
+          
+          
+          def search():
+              headers, body = request(API + "/api/v1/parcels/search?q=" + PARCEL + "&limit=1")
+              require_cors(headers)
+              rows = json.loads(body)
+              require(isinstance(rows, list) and any(row.get("parcel_id") == PARCEL for row in rows),
+                      "Search did not return the known test parcel")
+          
+          
+          def prediction_preflight():
+              headers, _ = request(API + "/api/v1/predictions/by-parcel", method="OPTIONS",
+                                   extra_headers={"Access-Control-Request-Method": "POST",
+                                                  "Access-Control-Request-Headers": "content-type"})
+              require_cors(headers)
+              require("POST" in headers.get("Access-Control-Allow-Methods", ""), "Browser POST is blocked")
+              require("content-type" in headers.get("Access-Control-Allow-Headers", "").lower(),
+                      "Browser JSON requests are blocked")
+          
+          
+          def prediction():
+              headers, body = request(API + "/api/v1/predictions/by-parcel", method="POST",
+                                      payload={"parcel_id": PARCEL})
+              require_cors(headers)
+              data = json.loads(body)
+              require(data.get("parcel", {}).get("parcel_id") == PARCEL, "Prediction parcel mismatch")
+              value = data.get("prediction", {}).get("estimated_public_parcel_value")
+              require(type(value) in (int, float) and math.isfinite(value) and value > 0,
+                      "Prediction is missing or invalid")
+          
+          
+          if __name__ == "__main__":
+              failures = []
+              checks = [("Website HTML", website), ("Model loaded", model),
+                        ("Property search and CORS", search),
+                        ("Prediction browser preflight", prediction_preflight), ("Prediction", prediction)]
+              for name, check in checks:
+                  for attempt in range(1, 4):
+                      try:
+                          check()
+                          print(f"PASS: {name}", flush=True)
+                          break
+                      except Exception as exc:
+                          print(f"Attempt {attempt}/3 failed for {name}: {exc}", flush=True)
+                          if attempt == 3:
+                              failures.append(name)
+                          else:
+                              time.sleep(15)
+              if failures:
+                  raise SystemExit("Health check failed: " + ", ".join(failures))
+              print("All Mosaivra health checks passed.")
+          PYTHON
