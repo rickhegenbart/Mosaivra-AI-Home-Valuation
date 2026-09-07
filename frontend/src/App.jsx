@@ -185,6 +185,20 @@ function computeUserAdjustedEstimate(selectedResult, details) {
 }
 
 
+const TESTER_CONTACT_KEY = "mosaivra.testerContact.v1";
+
+function loadTesterContact() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(TESTER_CONTACT_KEY) || "{}");
+    return {
+      name: typeof saved?.name === "string" ? saved.name.slice(0, 120) : "",
+      email: typeof saved?.email === "string" ? saved.email.slice(0, 254) : ""
+    };
+  } catch {
+    return { name: "", email: "" };
+  }
+}
+
 function MainApp() {
   const [query, setQuery] = useState("");
   const [parcels, setParcels] = useState([]);
@@ -194,6 +208,22 @@ function MainApp() {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [loadingPrediction, setLoadingPrediction] = useState(false);
   const [error, setError] = useState("");
+  const [testerContact, setTesterContact] = useState(loadTesterContact);
+  const [contactStorageUnavailable, setContactStorageUnavailable] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (testerContact.name || testerContact.email) {
+        window.localStorage.setItem(TESTER_CONTACT_KEY, JSON.stringify(testerContact));
+      } else {
+        window.localStorage.removeItem(TESTER_CONTACT_KEY);
+      }
+      setContactStorageUnavailable(false);
+    } catch {
+      setContactStorageUnavailable(true);
+    }
+  }, [testerContact]);
+
   const [feedbackRating, setFeedbackRating] = useState("");
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
@@ -343,6 +373,8 @@ async function getPrediction(parcelId) {
       parcel_id: parcel?.parcel_id || null,
       property_id: parcel?.property_id || null,
       address_line_1: parcel?.address_line_1 || null,
+      tester_name: testerContact.name.trim() || null,
+      tester_email: testerContact.email.trim() || null,
       rating: feedbackRating,
       comment: feedbackComment || null,
       baseline_estimate: baselineEstimate,
@@ -1064,6 +1096,41 @@ async function getPrediction(parcelId) {
             </p>
 
             <form onSubmit={submitFeedback} className="feedbackForm">
+              <fieldset style={{ border: "1px solid #888", borderRadius: 8, padding: 16, marginBottom: 16 }}>
+                <legend>Your details (optional)</legend>
+                <p className="helperText" id="tester-contact-help">
+                  Your name and email are included with your feedback so we can follow up.
+                  We remember them in this browser for your next property review.
+                  You can edit or clear them anytime.
+                </p>
+                <div style={{ display: "grid", gap: 12 }}>
+                  <label htmlFor="tester-name">Name
+                    <input id="tester-name" name="tester_name" type="text"
+                      autoComplete="name" maxLength={120}
+                      aria-describedby="tester-contact-help"
+                      style={{ display: "block", width: "100%", boxSizing: "border-box", padding: 10 }}
+                      value={testerContact.name}
+                      onChange={(event) => setTesterContact((previous) => ({ ...previous, name: event.target.value }))}
+                    />
+                  </label>
+                  <label htmlFor="tester-email">Email
+                    <input id="tester-email" name="tester_email" type="email"
+                      autoComplete="email" maxLength={254}
+                      aria-describedby="tester-contact-help"
+                      style={{ display: "block", width: "100%", boxSizing: "border-box", padding: 10 }}
+                      value={testerContact.email}
+                      onChange={(event) => setTesterContact((previous) => ({ ...previous, email: event.target.value }))}
+                    />
+                  </label>
+                  <button type="button" onClick={() => setTesterContact({ name: "", email: "" })}>
+                    Clear my details from this browser
+                  </button>
+                </div>
+                <p className="helperText">Clearing these fields does not change feedback already submitted.</p>
+                {contactStorageUnavailable && (
+                  <p role="status">Browser storage is unavailable. Your details will stay filled during this visit, but may not be remembered after you close or reload the page.</p>
+                )}
+              </fieldset>
               <div className="feedbackChoices">
                 <button
                   type="button"
@@ -1378,6 +1445,8 @@ function AdminDashboard() {
               <thead>
                 <tr>
                   <th>Date</th>
+                  <th>Name</th>
+                  <th>Email</th>
                   <th>Rating</th>
                   <th>Address</th>
                   <th>Parcel ID</th>
@@ -1390,6 +1459,8 @@ function AdminDashboard() {
                 {feedback.map((row) => (
                   <tr key={row.id || `${row.parcel_id}-${row.created_at}`}>
                     <td>{row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}</td>
+                    <td>{row.tester_name || "—"}</td>
+                    <td>{row.tester_email || "—"}</td>
                     <td>
                       <span className={`ratingBadge rating-${row.rating}`}>
                         {formatRating(row.rating)}

@@ -139,6 +139,10 @@ def predict_manual(request: ManualPredictionRequest):
 
 
 class FeedbackSubmission(BaseModel):
+    tester_name: str | None = Field(default=None, max_length=120)
+    tester_email: str | None = Field(
+        default=None, max_length=254, pattern=r"^[^\s@]+@[^\s@]+$"
+    )
     parcel_id: str | None = None
     property_id: str | None = None
     address_line_1: str | None = None
