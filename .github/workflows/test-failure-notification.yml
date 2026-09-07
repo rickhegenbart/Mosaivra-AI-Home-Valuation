@@ -1,0 +1,16 @@
+name: Test Failure Notification
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  notification-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Intentionally fail to test notifications
+        run: |
+          echo "Intentional failure to verify GitHub notification delivery."
+          exit 1
