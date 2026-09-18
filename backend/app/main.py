@@ -25,7 +25,7 @@ ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "ALLOWED_ORIGINS",
-        "https://repredict.onrender.com,http://localhost:5173,http://100.115.92.194:5173"
+        "https://mosaivra.app,https://www.mosaivra.app,https://repredict.onrender.com,http://localhost:5173,http://100.115.92.194:5173"
     ).split(",")
     if origin.strip()
 ]
