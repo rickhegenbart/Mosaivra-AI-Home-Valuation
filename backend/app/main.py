@@ -153,6 +153,8 @@ class FeedbackSubmission(BaseModel):
     address_line_1: str | None = None
     rating: str = Field(..., pattern="^(too_low|about_right|too_high)$")
     comment: str | None = None
+    insight_workflow_use: str | None = None
+    insight_opinion_impact: str | None = None
     baseline_estimate: float | None = None
     adjusted_estimate: float | None = None
 

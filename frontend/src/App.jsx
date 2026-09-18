@@ -226,6 +226,8 @@ function MainApp() {
 
   const [feedbackRating, setFeedbackRating] = useState("");
   const [feedbackComment, setFeedbackComment] = useState("");
+  const [insightWorkflowUse, setInsightWorkflowUse] = useState("");
+  const [insightOpinionImpact, setInsightOpinionImpact] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
 
@@ -385,6 +387,8 @@ async function getPrediction(parcelId) {
       tester_email: testerContact.email.trim(),
       rating: feedbackRating,
       comment: feedbackComment || null,
+      insight_workflow_use: insightWorkflowUse || null,
+      insight_opinion_impact: insightOpinionImpact || null,
       baseline_estimate: baselineEstimate,
       adjusted_estimate: scenarioEstimate,
     };
@@ -399,6 +403,8 @@ async function getPrediction(parcelId) {
 
       setFeedbackStatus("Thank you — your feedback was saved.");
       setFeedbackComment("");
+      setInsightWorkflowUse("");
+      setInsightOpinionImpact("");
     } catch (err) {
       console.error("Feedback save error:", err);
 
@@ -1231,6 +1237,32 @@ async function getPrediction(parcelId) {
                   }
                   rows="12"
                   placeholder="Enter your feedback here..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                How would you use or interpret these property insights in your
+                day-to-day work with clients, properties, or investment decisions?
+                <textarea
+                  value={insightWorkflowUse}
+                  onChange={(event) =>
+                    setInsightWorkflowUse(event.target.value)
+                  }
+                  rows="5"
+                  placeholder="Describe how these insights would fit into your workflow..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                Did any of the property insights change, confirm, or challenge your
+                initial opinion of the property? If so, how?
+                <textarea
+                  value={insightOpinionImpact}
+                  onChange={(event) =>
+                    setInsightOpinionImpact(event.target.value)
+                  }
+                  rows="5"
+                  placeholder="Describe whether the insights changed or confirmed your initial opinion..."
                 />
               </label>
 
