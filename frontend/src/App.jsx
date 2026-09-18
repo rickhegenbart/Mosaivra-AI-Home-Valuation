@@ -226,6 +226,12 @@ function MainApp() {
 
   const [feedbackRating, setFeedbackRating] = useState("");
   const [feedbackComment, setFeedbackComment] = useState("");
+  const [reviewedAddress, setReviewedAddress] = useState("");
+  const [displayedEstimate, setDisplayedEstimate] = useState("");
+  const [expectedValueRange, setExpectedValueRange] = useState("");
+  const [expectedValueType, setExpectedValueType] = useState("");
+  const [estimateSupport, setEstimateSupport] = useState("");
+  const [propertyDifferenceFactors, setPropertyDifferenceFactors] = useState("");
   const [insightWorkflowUse, setInsightWorkflowUse] = useState("");
   const [insightOpinionImpact, setInsightOpinionImpact] = useState("");
   const [feedbackStatus, setFeedbackStatus] = useState("");
@@ -387,6 +393,12 @@ async function getPrediction(parcelId) {
       tester_email: testerContact.email.trim(),
       rating: feedbackRating,
       comment: feedbackComment || null,
+      reviewed_address: reviewedAddress || null,
+      displayed_estimate: displayedEstimate || null,
+      expected_value_range: expectedValueRange || null,
+      expected_value_type: expectedValueType || null,
+      estimate_support: estimateSupport || null,
+      property_difference_factors: propertyDifferenceFactors || null,
       insight_workflow_use: insightWorkflowUse || null,
       insight_opinion_impact: insightOpinionImpact || null,
       baseline_estimate: baselineEstimate,
@@ -403,6 +415,12 @@ async function getPrediction(parcelId) {
 
       setFeedbackStatus("Thank you — your feedback was saved.");
       setFeedbackComment("");
+      setReviewedAddress("");
+      setDisplayedEstimate("");
+      setExpectedValueRange("");
+      setExpectedValueType("");
+      setEstimateSupport("");
+      setPropertyDifferenceFactors("");
       setInsightWorkflowUse("");
       setInsightOpinionImpact("");
     } catch (err) {
@@ -1195,48 +1213,76 @@ async function getPrediction(parcelId) {
 
               <div className="feedbackQuestions">
                 <p>
-                  <strong>Please address the following:</strong>
+                  <strong>Please answer each question below:</strong>
                 </p>
-
-                <ul>
-                  <li>What property address did you review?</li>
-
-                  <li>
-                    What estimate did Mosaivra AI display? If you adjusted the
-                    property inputs, please include both the original and
-                    adjusted estimates.
-                  </li>
-
-                  <li>What value or price range would you expect?</li>
-
-                  <li>
-                    Does your expected value represent likely sale price,
-                    suggested listing price, or assessed value?
-                  </li>
-
-                  <li>
-                    What supports your estimate—for example, comparable closed
-                    sales, a recent transaction, or firsthand knowledge? Include
-                    approximate dates when available.
-                  </li>
-
-                  <li>
-                    What property details might explain the difference, such as
-                    condition, renovations, square footage, outbuildings, or
-                    location?
-                  </li>
-                </ul>
               </div>
 
               <label className="wideLabel">
-                Comments and Supporting Details
+                What property address did you review?
                 <textarea
-                  value={feedbackComment}
+                  value={reviewedAddress}
+                  onChange={(event) => setReviewedAddress(event.target.value)}
+                  rows="3"
+                  placeholder="Enter the property address..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                What estimate did Mosaivra AI display? If you adjusted the
+                property inputs, please include both the original and adjusted
+                estimates.
+                <textarea
+                  value={displayedEstimate}
+                  onChange={(event) => setDisplayedEstimate(event.target.value)}
+                  rows="4"
+                  placeholder="Enter the displayed estimate and any adjusted estimate..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                What value or price range would you expect?
+                <textarea
+                  value={expectedValueRange}
+                  onChange={(event) => setExpectedValueRange(event.target.value)}
+                  rows="3"
+                  placeholder="Enter your expected value or price range..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                Does your expected value represent likely sale price, suggested
+                listing price, or assessed value?
+                <textarea
+                  value={expectedValueType}
+                  onChange={(event) => setExpectedValueType(event.target.value)}
+                  rows="3"
+                  placeholder="Describe what your expected value represents..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                What supports your estimate—for example, comparable closed
+                sales, a recent transaction, or firsthand knowledge? Include
+                approximate dates when available.
+                <textarea
+                  value={estimateSupport}
+                  onChange={(event) => setEstimateSupport(event.target.value)}
+                  rows="5"
+                  placeholder="Describe the information supporting your estimate..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                What property details might explain the difference, such as
+                condition, renovations, square footage, outbuildings, or
+                location?
+                <textarea
+                  value={propertyDifferenceFactors}
                   onChange={(event) =>
-                    setFeedbackComment(event.target.value)
+                    setPropertyDifferenceFactors(event.target.value)
                   }
-                  rows="12"
-                  placeholder="Enter your feedback here..."
+                  rows="5"
+                  placeholder="Describe property-specific factors..."
                 />
               </label>
 
@@ -1254,8 +1300,8 @@ async function getPrediction(parcelId) {
               </label>
 
               <label className="wideLabel">
-                Did any of the property insights change, confirm, or challenge your
-                initial opinion of the property? If so, how?
+                Did any of the property insights change, confirm, or challenge
+                your initial opinion of the property? If so, how?
                 <textarea
                   value={insightOpinionImpact}
                   onChange={(event) =>
@@ -1263,6 +1309,18 @@ async function getPrediction(parcelId) {
                   }
                   rows="5"
                   placeholder="Describe whether the insights changed or confirmed your initial opinion..."
+                />
+              </label>
+
+              <label className="wideLabel">
+                Additional comments or supporting details
+                <textarea
+                  value={feedbackComment}
+                  onChange={(event) =>
+                    setFeedbackComment(event.target.value)
+                  }
+                  rows="5"
+                  placeholder="Optional additional feedback..."
                 />
               </label>
 
